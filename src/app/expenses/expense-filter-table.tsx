@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import { Inbox } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,12 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatCurrency, formatDate } from '@/lib/format'
 import {
+  filterExpensesByDate,
   getAvailableMonths,
   getAvailableYears,
-  getMockExpenses,
-} from '@/lib/mock/expenses'
+} from '@/lib/expense-filter'
+import { formatCurrency, formatDate } from '@/lib/format'
 import { Expense } from '@/types/expense'
 
 interface ExpenseFilterTableProps {
@@ -47,10 +46,9 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
     [expenses, year]
   )
 
-  // 동일한 필터링 로직을 사용하기 위해 getMockExpenses를 그대로 호출한다
   const filteredExpenses = useMemo(
-    () => getMockExpenses({ year, month }),
-    [year, month]
+    () => filterExpensesByDate(expenses, { year, month }),
+    [expenses, year, month]
   )
 
   const handleYearChange = (value: string) => {
@@ -75,8 +73,13 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
   }
 
   const handleExcelDownload = () => {
-    // TODO: 엑셀 다운로드 로직 구현 필요 (Phase 3 / Task 007)
-    toast('다운로드 기능은 추후 제공됩니다')
+    const params = new URLSearchParams()
+    if (year) params.set('year', String(year))
+    if (month) params.set('month', String(month))
+
+    // /api/export가 Content-Disposition으로 파일명을 지정하므로,
+    // 브라우저가 해당 URL을 직접 다운로드 처리하도록 한다.
+    window.location.href = `/api/export?${params.toString()}`
   }
 
   return (

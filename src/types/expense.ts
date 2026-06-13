@@ -29,15 +29,17 @@ export interface ExcelCellMapping {
 
 /**
  * PRD 8.3절 셀 매핑 계약을 코드로 반영한 SSOT.
+ * 실제 템플릿(src/lib/templates/expense-template.xlsx)의 데이터 영역은 A10부터 시작하며,
+ * C:D는 "상세 내역"으로 병합되어 있고 "금액"은 E열이다(F열은 "비고"로 데이터 매핑 대상이 아님).
  * 실제 템플릿 양식 변경 시 PRD 8.3절과 함께 갱신한다.
  */
 export const EXPENSE_EXCEL_CELL_MAPPING: ExcelCellMapping = {
-  startCell: 'A5',
+  startCell: 'A10',
   columns: {
     useDate: 'A',
     category: 'B',
     content: 'C',
-    cost: 'D',
+    cost: 'E',
   },
 }
 

@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  outputFileTracingIncludes: {
+    '/api/export': ['./src/lib/templates/expense-template.xlsx'],
+  },
   async headers() {
     return [
       {

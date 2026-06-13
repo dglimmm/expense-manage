@@ -2,11 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { formatCurrency } from '@/lib/format'
-import { getMockExpenses } from '@/lib/mock/expenses'
+import { getExpenses } from '@/lib/notion/queries'
 
-export default function Home() {
-  // 전체 더미 데이터를 가져와 연간/이번 달 지출 요약을 계산한다
-  const expenses = getMockExpenses()
+export default async function Home() {
+  // 전체 비용 데이터를 가져와 연간/이번 달 지출 요약을 계산한다
+  const expenses = await getExpenses()
 
   const now = new Date()
   const currentYear = now.getFullYear()

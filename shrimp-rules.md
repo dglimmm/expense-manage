@@ -22,17 +22,17 @@
 
 ROADMAP/PRD에 따라 아래 위치에 신규 파일을 생성한다. 임의의 다른 위치(`src/utils`, `src/services` 등)를 새로 만들지 않는다.
 
-| 대상                           | 경로                                                                                    |
-| ------------------------------ | --------------------------------------------------------------------------------------- |
-| 비용/필터 타입 정의            | `src/types/expense.ts`                                                                  |
-| Notion API 클라이언트 및 쿼리  | `src/lib/notion/queries.ts` (필요 시 `src/lib/notion/` 하위에 추가 파일)                |
-| Notion 응답 → 도메인 모델 매퍼 | `src/lib/notion/` 내부 (queries와 분리 가능)                                            |
-| 엑셀 생성 로직                 | `src/lib/excel/` (예: `src/lib/excel/build-workbook.ts`)                                |
-| 엑셀 템플릿 파일               | `src/lib/templates/expense-template.xlsx` (이미 존재, 절대 `/public`으로 이동하지 않음) |
-| 더미 데이터                    | `src/lib/mock/expenses.ts`                                                              |
-| 비용 다운로드 API              | `src/app/api/export/route.ts`                                                           |
-| 날짜 필터링 화면               | `src/app/expenses/page.tsx`                                                             |
-| 홈 대시보드                    | `src/app/page.tsx` (기존 파일 수정)                                                     |
+| 대상                           | 경로                                                                                                                       |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| 비용/필터 타입 정의            | `src/types/expense.ts`                                                                                                     |
+| Notion API 클라이언트 및 쿼리  | `src/lib/notion/queries.ts` (필요 시 `src/lib/notion/` 하위에 추가 파일)                                                   |
+| Notion 응답 → 도메인 모델 매퍼 | `src/lib/notion/mappers.ts`                                                                                                |
+| 날짜 필터링 공용 순수 함수     | `src/lib/expense-filter.ts` (서버/클라이언트 공용, parseUseDate/filterExpensesByDate/getAvailableYears/getAvailableMonths) |
+| 엑셀 생성 로직                 | `src/lib/excel/build-workbook.ts` (EXPENSE_EXCEL_CELL_MAPPING 기반 워크북 생성)                                            |
+| 엑셀 템플릿 파일               | `src/lib/templates/expense-template.xlsx` (이미 존재, 절대 `/public`으로 이동하지 않음)                                    |
+| 비용 다운로드 API              | `src/app/api/export/route.ts`                                                                                              |
+| 날짜 필터링 화면               | `src/app/expenses/page.tsx`                                                                                                |
+| 홈 대시보드                    | `src/app/page.tsx` (기존 파일 수정)                                                                                        |
 
 - 경로 별칭은 `components.json` 정의를 따른다: `@/components`, `@/lib`, `@/hooks`, `@/ui`, `@/utils`.
 - 새 shadcn/ui 컴포넌트는 `npx shadcn@latest add <name>`으로 추가하고 직접 작성하지 않는다.

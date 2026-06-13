@@ -1,8 +1,8 @@
 import { ExpenseFilterTable } from '@/app/expenses/expense-filter-table'
-import { getMockExpenses } from '@/lib/mock/expenses'
+import { getExpenses } from '@/lib/notion/queries'
 
-export default function ExpensesPage() {
-  const expenses = getMockExpenses()
+export default async function ExpensesPage() {
+  const expenses = await getExpenses()
 
   return (
     <div className="container mx-auto px-4 py-12">

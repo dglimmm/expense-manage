@@ -15,3 +15,15 @@ export function formatCurrency(amount: number): string {
 export function formatDate(dateStr: string): string {
   return dateStr.replaceAll('-', '.')
 }
+
+/**
+ * Date를 파일명에 사용할 "yyyyMMdd" 형식 문자열로 변환한다.
+ *
+ * 예: 2026-06-13 -> "20260613"
+ */
+export function formatDateForFilename(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}${month}${day}`
+}

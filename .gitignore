@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# playwright mcp
+.playwright-mcp/
+
+# shrimp task manager
+shrimp_data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
