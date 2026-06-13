@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
     headers: {
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      // filename(ASCII fallback)을 함께 지정해야 filename*(RFC 5987)을 지원하지 않는
+      // 환경에서도 확장자가 없는 임의 파일명(UUID 등)으로 저장되지 않는다.
+      'Content-Disposition': `attachment; filename="expense-report.xlsx"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      'Cache-Control': 'no-store',
     },
   })
 }
