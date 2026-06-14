@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Inbox } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -72,14 +73,42 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
     setMonth(Number(value))
   }
 
-  const handleExcelDownload = () => {
+  const handleExcelDownload = async () => {
     const params = new URLSearchParams()
     if (year) params.set('year', String(year))
     if (month) params.set('month', String(month))
 
-    // /api/export가 Content-Disposition으로 파일명을 지정하므로,
-    // 브라우저가 해당 URL을 직접 다운로드 처리하도록 한다.
-    window.location.href = `/api/export?${params.toString()}`
+    // 직접 링크(window.location.href) 다운로드 방식은 응답이 4xx/5xx여도
+    // 사용자에게 별도 피드백 없이 빈 화면/JSON 다운로드로 끝나버린다.
+    // fetch + blob 방식으로 변경해 실패 시 toast로 에러 메시지를 안내한다.
+    try {
+      const res = await fetch(`/api/export?${params.toString()}`)
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        toast.error(body?.error ?? '엑셀 다운로드 중 오류가 발생했습니다.')
+        return
+      }
+
+      // 응답 헤더의 filename*(UTF-8)을 우선 사용하고, 없으면 기본 파일명으로 대체한다.
+      const disposition = res.headers.get('Content-Disposition') ?? ''
+      const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/)
+      const filename = utf8Match
+        ? decodeURIComponent(utf8Match[1])
+        : 'expense-report.xlsx'
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch {
+      toast.error('엑셀 다운로드 중 오류가 발생했습니다.')
+    }
   }
 
   return (
@@ -91,7 +120,10 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
             value={year ? String(year) : ALL_VALUE}
             onValueChange={handleYearChange}
           >
-            <SelectTrigger className="w-full sm:w-[140px]">
+            <SelectTrigger
+              className="w-full sm:w-[140px]"
+              aria-label="연도 선택"
+            >
               <SelectValue placeholder="연도 선택" />
             </SelectTrigger>
             <SelectContent>
@@ -108,7 +140,7 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
             value={month ? String(month) : ALL_VALUE}
             onValueChange={handleMonthChange}
           >
-            <SelectTrigger className="w-full sm:w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]" aria-label="월 선택">
               <SelectValue placeholder="월 선택" />
             </SelectTrigger>
             <SelectContent>
@@ -122,7 +154,11 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
           </Select>
         </div>
 
-        <Button onClick={handleExcelDownload} className="sm:w-auto">
+        <Button
+          onClick={handleExcelDownload}
+          className="sm:w-auto"
+          aria-label="엑셀 다운로드"
+        >
           엑셀 다운로드
         </Button>
       </div>
@@ -159,7 +195,7 @@ export function ExpenseFilterTable({ expenses }: ExpenseFilterTableProps) {
         </div>
       ) : (
         <div className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-center">
-          <Inbox className="size-10" />
+          <Inbox className="size-10" aria-hidden="true" />
           <p>조건에 맞는 데이터가 없습니다.</p>
         </div>
       )}

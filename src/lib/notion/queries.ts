@@ -1,4 +1,5 @@
 import { Client, isFullDatabase } from '@notionhq/client'
+import { unstable_cache } from 'next/cache'
 
 import { env } from '@/lib/env'
 import { mapNotionPageToExpense } from '@/lib/notion/mappers'
@@ -24,9 +25,9 @@ async function getDataSourceId(): Promise<string> {
 
 /**
  * Notion 데이터베이스에서 전체 비용 항목을 조회해 Expense 목록으로 변환한다.
- * 날짜별 필터링은 src/lib/expense-filter.ts의 순수 함수로 별도 처리한다.
+ * 실제 Notion API 호출(데이터소스 조회 포함) 부분.
  */
-export async function getExpenses(): Promise<Expense[]> {
+async function fetchExpensesFromNotion(): Promise<Expense[]> {
   const dataSourceId = await getDataSourceId()
 
   const response = await notion.dataSources.query({
@@ -37,4 +38,26 @@ export async function getExpenses(): Promise<Expense[]> {
   return response.results
     .map(page => mapNotionPageToExpense(page as unknown as NotionExpensePage))
     .filter(expense => expense.useDate !== '')
+}
+
+/**
+ * fetchExpensesFromNotion을 60초(revalidate: 60) 동안 캐싱한다.
+ * 개인용 단일 사용자 앱이므로 60초 정도의 staleness는 허용 가능하며,
+ * getDataSourceId() 호출(데이터베이스 조회)도 캐시 범위에 포함되어 함께 캐싱된다.
+ */
+const getCachedExpenses = unstable_cache(
+  fetchExpensesFromNotion,
+  ['expenses'],
+  {
+    revalidate: 60,
+  }
+)
+
+/**
+ * Notion 데이터베이스에서 전체 비용 항목을 조회해 Expense 목록으로 반환한다.
+ * 결과는 60초간 캐싱된다 (unstable_cache). 날짜별 필터링은
+ * src/lib/expense-filter.ts의 순수 함수로 별도 처리한다.
+ */
+export async function getExpenses(): Promise<Expense[]> {
+  return getCachedExpenses()
 }

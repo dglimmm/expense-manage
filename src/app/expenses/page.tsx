@@ -1,8 +1,16 @@
 import { ExpenseFilterTable } from '@/app/expenses/expense-filter-table'
+import { logError } from '@/lib/logger'
 import { getExpenses } from '@/lib/notion/queries'
 
 export default async function ExpensesPage() {
-  const expenses = await getExpenses()
+  // 조회 실패 시 로그를 남기고 다시 throw하여 app/expenses/error.tsx가 처리하도록 한다.
+  let expenses
+  try {
+    expenses = await getExpenses()
+  } catch (e) {
+    logError('expenses/getExpenses', e)
+    throw e
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">

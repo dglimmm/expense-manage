@@ -2,11 +2,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { formatCurrency } from '@/lib/format'
+import { logError } from '@/lib/logger'
 import { getExpenses } from '@/lib/notion/queries'
 
 export default async function Home() {
-  // 전체 비용 데이터를 가져와 연간/이번 달 지출 요약을 계산한다
-  const expenses = await getExpenses()
+  // 전체 비용 데이터를 가져와 연간/이번 달 지출 요약을 계산한다.
+  // 조회 실패 시 로그를 남기고 다시 throw하여 app/error.tsx가 처리하도록 한다.
+  let expenses
+  try {
+    expenses = await getExpenses()
+  } catch (e) {
+    logError('home/getExpenses', e)
+    throw e
+  }
 
   const now = new Date()
   const currentYear = now.getFullYear()
