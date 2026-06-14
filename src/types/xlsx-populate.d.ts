@@ -5,6 +5,7 @@ declare module 'xlsx-populate' {
   interface Cell {
     value(value: string | number | Date): Cell
     value(): string | number | boolean | Date | undefined
+    style(name: 'numberFormat', value: string): Cell
   }
 
   interface Sheet {

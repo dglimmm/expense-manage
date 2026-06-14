@@ -19,11 +19,6 @@ function parseUseDateAsLocalDate(useDate: string): Date {
   return new Date(year, month - 1, day)
 }
 
-/** F7(신청일) 셀의 기존 텍스트 형식("yyyy m. d")에 맞춰 오늘 날짜를 포맷한다. */
-function formatApplicationDate(date: Date): string {
-  return `${date.getFullYear()} ${date.getMonth() + 1}. ${date.getDate()}`
-}
-
 /**
  * 기존 지출결의서 엑셀 양식(헤더/합계 등 정적 영역)을 그대로 유지한 채,
  * F7(신청일)에는 오늘 날짜를 채우고, EXPENSE_EXCEL_CELL_MAPPING에 따라
@@ -37,7 +32,11 @@ export async function buildExpenseWorkbook(
   const { startCell, columns } = EXPENSE_EXCEL_CELL_MAPPING
   const startRow = Number(startCell.match(/\d+/)?.[0])
 
-  sheet.cell('F7').value(formatApplicationDate(new Date()))
+  const now = new Date()
+  sheet
+    .cell('F7')
+    .value(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+    .style('numberFormat', 'yyyy-mm-dd')
 
   expenses.forEach((expense, index) => {
     const row = startRow + index
